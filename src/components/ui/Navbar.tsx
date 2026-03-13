@@ -2,10 +2,21 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Sparkles, Menu, X } from "lucide-react";
+import { Sparkles, Menu, X, LogOut, User as UserIcon } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { SignupModal } from "./SignupModal";
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { user, signOut } = useAuth();
+
+  const handleAnalyzeClick = (e: React.MouseEvent) => {
+    if (!user) {
+      e.preventDefault();
+      setIsModalOpen(true);
+    }
+  };
 
   return (
     <nav className="fixed top-0 left-0 w-full z-50 bg-brand-deep/60 backdrop-blur-xl border-b border-white/5">
@@ -23,11 +34,39 @@ export function Navbar() {
           <Link href="#demo" className="text-sm font-medium text-zinc-300 hover:text-white transition-colors">Live Demo</Link>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-4">
-          <Link href="/login" className="hidden xs:block text-sm font-medium text-zinc-300 hover:text-white transition-colors">Log in</Link>
-          <Link href="/submit" className="text-xs sm:text-sm font-medium px-4 sm:px-5 py-2 sm:py-2.5 rounded-full bg-white text-black hover:bg-zinc-200 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.2)]">
-            Analyze Idea
-          </Link>
+        <div className="flex items-center gap-3 sm:gap-6">
+          {!user ? (
+            <>
+              <button 
+                onClick={() => setIsModalOpen(true)}
+                className="hidden sm:block text-sm font-bold text-zinc-400 hover:text-white transition-colors px-2"
+              >
+                Analyze Idea
+              </button>
+              <Link 
+                href="/login" 
+                className="flex items-center justify-center text-xs sm:text-sm font-bold px-5 sm:px-7 py-2 sm:py-3 rounded-full bg-white text-black hover:bg-zinc-200 transition-all shadow-[0_0_20px_rgba(255,255,255,0.2)] whitespace-nowrap"
+              >
+                Sign In
+              </Link>
+            </>
+          ) : (
+            <div className="flex items-center gap-4">
+              <Link 
+                href="/submit" 
+                className="text-xs sm:text-sm font-bold px-4 sm:px-5 py-2 sm:py-2.5 rounded-full bg-white text-black hover:bg-zinc-200 transition-colors"
+              >
+                Dashboard
+              </Link>
+              <button 
+                onClick={() => signOut()}
+                className="p-2 text-zinc-400 hover:text-white transition-colors"
+                title="Logout"
+              >
+                <LogOut className="w-5 h-5" />
+              </button>
+            </div>
+          )}
           <button 
             className="md:hidden p-2 text-zinc-400 hover:text-white"
             onClick={() => setIsOpen(!isOpen)}
@@ -43,9 +82,11 @@ export function Navbar() {
           <Link href="#how-it-works" onClick={() => setIsOpen(false)} className="text-lg font-medium text-zinc-300">How it Works</Link>
           <Link href="#experts" onClick={() => setIsOpen(false)} className="text-lg font-medium text-zinc-300">AI Experts</Link>
           <Link href="#demo" onClick={() => setIsOpen(false)} className="text-lg font-medium text-zinc-300">Live Demo</Link>
-          <Link href="/login" onClick={() => setIsOpen(false)} className="text-lg font-medium text-zinc-300">Log in</Link>
+          <Link href="/login" onClick={() => setIsOpen(false)} className="text-lg font-medium text-zinc-300">Sign In</Link>
         </div>
       )}
+
+      <SignupModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </nav>
   );
 }

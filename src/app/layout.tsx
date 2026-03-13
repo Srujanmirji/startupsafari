@@ -5,6 +5,8 @@ import './globals.css';
 import { ScrollProgress } from '@/components/ui/ScrollProgress';
 import { SmoothScroll } from '@/components/ui/SmoothScroll';
 
+import { AuthProvider } from '@/context/AuthContext';
+
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 const poppins = Poppins({ weight: ['400', '500', '600', '700'], subsets: ['latin'], variable: '--font-poppins' });
 
@@ -21,9 +23,11 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={`${inter.variable} ${poppins.variable} font-sans antialiased min-h-screen flex flex-col bg-[#05050f] text-white overflow-x-hidden`}>
-        <SmoothScroll />
-        <ScrollProgress />
-        {children}
+        <AuthProvider>
+          <SmoothScroll />
+          <ScrollProgress />
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

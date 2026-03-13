@@ -1,87 +1,201 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { Navbar } from "@/components/ui/Navbar";
-import { Sparkles, Mail, Lock, Github, Chrome } from "lucide-react";
+import { Sparkles, Mail, Chrome, ArrowRight, Loader2 } from "lucide-react";
 import Link from "next/link";
+import React, { useState } from "react";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Login() {
+  const [isHovered, setIsHovered] = useState(false);
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const { signInWithGoogle, signInWithOtp } = useAuth();
+
+  // 3D Tilt Logic
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+
+  const mouseXSpring = useSpring(x, { stiffness: 300, damping: 30 });
+  const mouseYSpring = useSpring(y, { stiffness: 300, damping: 30 });
+
+  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["5deg", "-5deg"]);
+  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-5deg", "5deg"]);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    x.set(mouseX / width - 0.5);
+    y.set(mouseY / height - 0.5);
+  };
+
+  const handleMouseLeave = () => {
+    x.set(0);
+    y.set(0);
+  };
+
+  const handleOtpLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage(null);
+    try {
+      const { error } = await signInWithOtp(email);
+      if (error) throw error;
+      setMessage({ type: 'success', text: "OTP sent! Check your inbox." });
+    } catch (err: any) {
+      setMessage({ type: 'error', text: err.message || "Failed to send OTP." });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-[#05050f] text-white overflow-hidden relative">
+    <div className="min-h-screen bg-[#05050f] text-white overflow-hidden relative font-sans flex flex-col">
       <Navbar />
       
-      {/* Background Decor */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-electric-blue/10 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2"></div>
-      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-violet-glow/10 blur-[120px] rounded-full translate-y-1/2 -translate-x-1/2"></div>
+      {/* Animated Background Orbs */}
+      <motion.div 
+        animate={{ 
+          scale: [1, 1.2, 1],
+          opacity: [0.3, 0.5, 0.3],
+        }}
+        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        className="fixed top-20 right-[-10%] w-[600px] h-[600px] bg-electric-blue/20 blur-[150px] rounded-full pointer-events-none"
+      />
+      <motion.div 
+        animate={{ 
+          scale: [1, 1.3, 1],
+          opacity: [0.2, 0.4, 0.2],
+        }}
+        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+        className="fixed bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-violet-glow/20 blur-[150px] rounded-full pointer-events-none"
+      />
 
-      <main className="pt-32 pb-20 px-6 flex items-center justify-center relative z-10">
+      <main className="flex-grow flex items-center justify-center relative z-10 px-4 pt-24 pb-12 w-full [perspective:2000px]">
+        
+        {/* Tilting Container */}
         <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="w-full max-w-md p-10 rounded-[2.5rem] bg-white/5 border border-white/10 backdrop-blur-xl shadow-2xl"
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
+          style={{
+            rotateY,
+            rotateX,
+            transformStyle: "preserve-3d",
+          }}
+          className="w-full max-w-[480px] relative"
         >
-          <div className="text-center mb-10">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-electric-blue to-violet-glow flex items-center justify-center text-white shadow-lg mx-auto mb-6">
-                <Sparkles className="w-8 h-8" />
+          {/* Glass Card */}
+          <div 
+            className="w-full p-8 sm:p-12 rounded-[2.5rem] bg-white/5 border border-white/10 backdrop-blur-2xl shadow-[0_0_50px_rgba(0,0,0,0.5)] relative overflow-hidden"
+            style={{ transform: "translateZ(30px)", transformStyle: "preserve-3d" }}
+          >
+            {/* Shimmer Effect */}
+            <div className="absolute top-0 left-[-100%] w-[200%] h-full bg-gradient-to-r from-transparent via-white/5 to-transparent skew-x-[-30deg] animate-shimmer pointer-events-none" />
+
+            <div className="text-center mb-10" style={{ transform: "translateZ(50px)" }}>
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-electric-blue to-violet-glow flex items-center justify-center text-white shadow-[0_0_30px_rgba(59,130,246,0.5)] mx-auto mb-6 relative group cursor-pointer">
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                  className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"
+                />
+                <Sparkles className="w-8 h-8 relative z-10" />
+              </div>
+              <h1 className="text-4xl font-bold font-heading mb-3 tracking-tight">Welcome Back</h1>
+              <p className="text-zinc-400 font-medium tracking-wide">Enter your email to continue your safari.</p>
             </div>
-            <h1 className="text-3xl font-bold font-heading mb-2">Welcome Back</h1>
-            <p className="text-zinc-500">Sign in to continue your safari.</p>
-          </div>
 
-          <div className="space-y-4 mb-8">
-            <button className="w-full flex items-center justify-center gap-3 py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors font-semibold">
-                <Chrome className="w-5 h-5" />
-                Continue with Google
-            </button>
-            <button className="w-full flex items-center justify-center gap-3 py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors font-semibold">
-                <Github className="w-5 h-5" />
-                Continue with GitHub
-            </button>
-          </div>
+            {/* Social Logins */}
+            <div className="space-y-4 mb-8" style={{ transform: "translateZ(40px)" }}>
+              <button 
+                onClick={() => signInWithGoogle()}
+                className="w-full flex items-center justify-center gap-3 py-3.5 rounded-xl bg-white/[0.03] border border-white/10 hover:bg-white/[0.08] hover:border-white/20 transition-all font-semibold text-zinc-300 hover:text-white group"
+              >
+                  <Chrome className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                  Continue with Google
+              </button>
+            </div>
 
-          <div className="relative mb-8 text-center">
-            <div className="absolute top-1/2 left-0 w-full h-[1px] bg-white/5 -translate-y-1/2"></div>
-            <span className="relative bg-[#0b0b1a] px-4 text-xs font-bold text-zinc-600 uppercase tracking-widest">Or email</span>
-          </div>
+            {/* Divider */}
+            <div className="relative mb-8 text-center" style={{ transform: "translateZ(30px)" }}>
+              <div className="absolute top-1/2 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-y-1/2"></div>
+              <span className="relative bg-[#0a0a16] px-4 text-xs font-bold text-zinc-500 uppercase tracking-widest rounded-full py-1 border border-white/5">Or Email OTP</span>
+            </div>
 
-          <form className="space-y-6">
-            <div className="space-y-2">
-                <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest ml-1">Email Address</label>
-                <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-                    <input 
-                        type="email" 
-                        placeholder="name@email.com" 
-                        className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-white focus:outline-none focus:border-electric-blue/50 transition-colors"
-                    />
+            {/* Form */}
+            <form onSubmit={handleOtpLogin} className="space-y-5" style={{ transform: "translateZ(45px)" }}>
+              <div className="group">
+                  <div className="relative overflow-hidden rounded-xl bg-white/[0.02] border border-white/10 focus-within:border-electric-blue/50 focus-within:bg-white/[0.04] transition-all duration-300">
+                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 group-focus-within:text-electric-blue transition-colors z-10" />
+                      <input 
+                          type="email" 
+                          required
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          placeholder="name@company.com" 
+                          className="w-full bg-transparent pl-12 pr-4 py-4 text-white placeholder:text-zinc-600 focus:outline-none text-sm font-medium relative z-10"
+                      />
+                      {/* Focus background glow */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-electric-blue/0 to-transparent opacity-0 group-focus-within:opacity-20 transition-opacity duration-500 pointer-events-none" />
+                  </div>
+              </div>
+
+              {message && (
+                <div className={`p-4 rounded-xl text-sm font-medium ${message.type === 'success' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
+                  {message.text}
                 </div>
-            </div>
-            <div className="space-y-2">
-                <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest ml-1">Password</label>
-                <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
-                    <input 
-                        type="password" 
-                        placeholder="••••••••" 
-                        className="w-full bg-white/5 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-white focus:outline-none focus:border-electric-blue/50 transition-colors"
-                    />
-                </div>
-            </div>
-            
-            <Link 
-                href="/dashboard"
-                className="block w-full text-center bg-white text-black py-4 rounded-xl font-bold hover:bg-zinc-200 transition-all hover:scale-[1.02] shadow-xl shadow-white/10"
-            >
-                Sign In
-            </Link>
-          </form>
+              )}
 
-          <p className="mt-8 text-center text-sm text-zinc-500">
-            Don't have an account?{" "}
-            <Link href="/signup" className="text-white hover:text-electric-blue transition-colors font-bold">Sign up</Link>
-          </p>
+              <button 
+                  type="submit"
+                  disabled={loading}
+                  onMouseEnter={() => setIsHovered(true)}
+                  onMouseLeave={() => setIsHovered(false)}
+                  className="mt-2 w-full flex items-center justify-center gap-2 bg-white text-black py-4 rounded-xl font-bold hover:bg-zinc-200 transition-all shadow-[0_0_20px_rgba(255,255,255,0.15)] group relative overflow-hidden disabled:opacity-70"
+              >
+                  <span className="relative z-10">{loading ? "Sending..." : "Send OTP"}</span>
+                  {!loading && (
+                    <motion.div
+                      animate={{ x: isHovered ? 5 : 0 }}
+                      className="relative z-10"
+                    >
+                      <ArrowRight className="w-4 h-4" />
+                    </motion.div>
+                  )}
+                  {loading && <Loader2 className="w-4 h-4 animate-spin relative z-10" />}
+                  {/* Button Hover effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent -translate-x-full group-hover:animate-shimmer" />
+              </button>
+            </form>
+
+            <p className="mt-8 text-center text-sm font-medium text-zinc-500" style={{ transform: "translateZ(20px)" }}>
+              Don't have an account?{" "}
+              <Link onClick={() => {}} href="#" className="text-white hover:text-electric-blue transition-colors font-bold border-b border-transparent hover:border-electric-blue pb-0.5">
+                Join Safari
+              </Link>
+            </p>
+          </div>
         </motion.div>
       </main>
+
+      <style jsx global>{`
+        @keyframes shimmer {
+          100% {
+            transform: translateX(100%);
+          }
+        }
+        .animate-shimmer {
+          animation: shimmer 2s infinite;
+        }
+      `}</style>
     </div>
   );
 }

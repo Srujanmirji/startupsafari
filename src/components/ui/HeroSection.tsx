@@ -3,13 +3,28 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowRight, Play } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 import { HeroScene } from "../three/HeroScene";
+import { useAuth } from "@/context/AuthContext";
+import { SignupModal } from "./SignupModal";
+import { useRouter } from "next/navigation";
 
 export function HeroSection() {
   const { scrollY } = useScroll();
   const yText = useTransform(scrollY, [0, 1000], [0, 200]);
   const opacityText = useTransform(scrollY, [0, 500], [1, 0]);
   
+  const { user } = useAuth();
+  const router = useRouter();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleStartAnalysis = () => {
+    if (user) {
+      router.push("/submit");
+    } else {
+      setIsModalOpen(true);
+    }
+  };
   return (
     <section className="relative min-h-screen flex items-center pt-24 lg:pt-20 overflow-hidden">
       {/* Three.js Background/Right Scene - Absolute on mobile, but moved for better spacing */}
@@ -51,13 +66,13 @@ export function HeroSection() {
             transition={{ duration: 0.5, delay: 0.5 }}
             className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 sm:gap-6"
           >
-            <Link
-              href="/submit"
+            <button
+              onClick={handleStartAnalysis}
               className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white text-black px-6 sm:px-8 py-3.5 sm:py-4 rounded-full font-bold text-base sm:text-lg hover:bg-zinc-200 transition-all hover:scale-105 shadow-[0_0_30px_rgba(255,255,255,0.3)]"
             >
-              Start Idea Analysis
+              Analyze Idea
               <ArrowRight className="w-5 h-5" />
-            </Link>
+            </button>
             
             <button className="flex items-center gap-2 text-white font-semibold hover:text-electric-blue transition-colors group py-2">
               <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-white/20 flex items-center justify-center group-hover:border-electric-blue/50 group-hover:bg-electric-blue/10 transition-all">
@@ -93,6 +108,8 @@ export function HeroSection() {
 
       {/* Decorative gradient blur */}
       <div className="absolute bottom-0 left-0 w-full h-64 bg-gradient-to-t from-brand-deep to-transparent z-0 pointer-events-none"></div>
+      
+      <SignupModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </section>
   );
 }
