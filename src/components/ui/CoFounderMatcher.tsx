@@ -31,48 +31,62 @@ export function CoFounderMatcher({ scores }: { scores: any }) {
   if (matches.length === 0) return null;
 
   return (
-    <div className="mt-16 p-8 rounded-[2rem] bg-white/[0.02] border border-white/5 backdrop-blur-3xl">
-      <div className="flex items-center gap-4 mb-10">
-        <div className="p-3 rounded-2xl bg-electric-blue/10 border border-electric-blue/20 text-electric-blue">
-          <Users className="w-6 h-6" />
+    <motion.div 
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      className="mt-16 p-10 rounded-[3rem] bg-white/[0.02] border border-white/5 backdrop-blur-3xl relative overflow-hidden group hover:border-electric-blue/20 transition-all duration-700"
+    >
+      {/* Background Accent */}
+      <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-electric-blue/[0.04] rounded-full blur-[100px] -mr-48 -mt-48 group-hover:bg-electric-blue/[0.06] transition-all duration-700" />
+
+      <div className="flex items-center gap-6 mb-12 relative z-10">
+        <div className="p-4 rounded-[1.25rem] bg-electric-blue/10 border border-electric-blue/20 text-electric-blue shadow-[0_0_20px_rgba(59,130,246,0.15)] group-hover:scale-110 group-hover:shadow-electric-blue/30 transition-all duration-500">
+          <Users className="w-8 h-8" />
         </div>
         <div>
-          <h2 className="text-3xl font-bold font-heading">Co-Founder Matcher</h2>
-          <p className="text-zinc-500 text-sm">Based on your weaknesses, here's who you should recruit</p>
+          <h2 className="text-3xl font-bold font-heading text-white bg-gradient-to-r from-white to-zinc-500 bg-clip-text text-transparent">Co-Founder Matcher</h2>
+          <p className="text-zinc-500 text-sm font-medium">Based on your weaknesses, here's who you should recruit</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative z-10">
         {matches.map((match, i) => {
           const Icon = match.icon;
           return (
             <motion.div
               key={i}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/[0.08] transition-all group"
+              transition={{ delay: 0.2 + i * 0.1, type: "spring", stiffness: 100 }}
+              className="p-8 rounded-3xl bg-white/[0.03] border border-white/10 hover:bg-white/[0.06] hover:border-white/20 hover:shadow-[0_20px_40px_rgba(0,0,0,0.3)] transition-all duration-500 group/card relative overflow-hidden"
             >
-              <div className="flex items-center gap-4 mb-4">
+              <div 
+                className="absolute -top-10 -right-10 w-24 h-24 blur-3xl opacity-0 group-hover/card:opacity-20 transition-opacity duration-500"
+                style={{ backgroundColor: match.color }}
+              />
+              
+              <div className="flex items-center gap-5 mb-6">
                 <div 
-                  className="p-3 rounded-xl border transition-all group-hover:scale-110"
+                  className="p-4 rounded-2xl border transition-all duration-500 group-hover/card:scale-110"
                   style={{ backgroundColor: `${match.color}15`, borderColor: `${match.color}30` }}
                 >
-                  <Icon className="w-6 h-6" style={{ color: match.color }} />
+                  <Icon className="w-7 h-7" style={{ color: match.color }} />
                 </div>
                 <div>
-                  <h4 className="font-bold text-white text-lg">{match.type}</h4>
-                  <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Recommended</span>
+                  <h4 className="font-black text-white text-lg tracking-tight leading-tight">{match.type}</h4>
+                  <span className="text-[9px] font-black text-zinc-500 uppercase tracking-[0.2em] group-hover/card:text-white/40 transition-colors">Recommended</span>
                 </div>
               </div>
-              <p className="text-xs text-zinc-400 leading-relaxed">{match.desc}</p>
               
-              <div className="mt-6 pt-4 border-t border-white/5">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-                  <span className="text-[10px] text-amber-400 font-bold uppercase tracking-widest">
-                    Weakness: {match.weakness[0]}
+              <p className="text-sm text-zinc-400 leading-relaxed font-medium mb-8 min-h-[4.5rem] group-hover/card:text-zinc-200 transition-colors">{match.desc}</p>
+              
+              <div className="pt-6 border-t border-white/5 mt-auto">
+                <div className="flex items-center gap-3">
+                  <div className="w-2 h-2 rounded-full animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.5)]" style={{ backgroundColor: match.color }} />
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em]" style={{ color: match.color }}>
+                    Safari Gap: {match.weakness[0]}
                   </span>
                 </div>
               </div>
@@ -80,6 +94,7 @@ export function CoFounderMatcher({ scores }: { scores: any }) {
           );
         })}
       </div>
-    </div>
+    </motion.div>
   );
 }
+

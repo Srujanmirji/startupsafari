@@ -8,20 +8,23 @@ const analyzeIdea = async (req, res) => {
     const { idea_id, questionnaire_answers } = req.body;
     const userId = req.user.id;
 
-    // 1. Verify idea exists and belongs to user
-    const { data: idea, error: ideaError } = await supabaseAdmin
-      .from('ideas')
-      .select('*')
-      .eq('id', idea_id)
-      .eq('user_id', userId)
-      .single();
-
-    if (ideaError || !idea) {
-      return res.status(404).json({ error: 'Idea not found or unauthorized' });
+    // 1. Verify idea exists and belongs to user (with local-idea fallback)
+    let idea = { title: "Your Startup", description: req.body.description || "" };
+    
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (uuidRegex.test(idea_id)) {
+      const { data, error } = await supabaseAdmin
+        .from('ideas')
+        .select('*')
+        .eq('id', idea_id)
+        .eq('user_id', userId)
+        .single();
+      
+      if (data) idea = data;
     }
 
-    // 2. Run analysis
-    const { scores, insights, pitch_deck, competitors, survey_questions, badges } = await analyzeWithPersonas(idea);
+    // 2. Run analysis with questionnaire context
+    const { scores, insights, pitch_deck, competitors, survey_questions, badges } = await analyzeWithPersonas(idea, questionnaire_answers);
     const final_score = calculateFinalScore(scores);
     const swot = generateSWOT(scores);
 
@@ -85,16 +88,10 @@ const getAnalysisResult = async (req, res) => {
     const { idea_id } = req.params;
     const userId = req.user.id;
 
-    // Verify idea belongs to user
-    const { data: idea, error: ideaError } = await supabaseAdmin
-      .from('ideas')
-      .select('id')
-      .eq('id', idea_id)
-      .eq('user_id', userId)
-      .single();
-
-    if (ideaError || !idea) {
-      return res.status(404).json({ error: 'Idea not found or unauthorized' });
+    // Verify idea belongs to user (relaxed for local-only/guest ideas)
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(idea_id)) {
+      return res.status(404).json({ error: 'No analysis results found for this local idea' });
     }
 
     // Get the most recent analysis result for this idea

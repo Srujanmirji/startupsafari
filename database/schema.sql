@@ -71,3 +71,36 @@ CREATE POLICY "Users can update their own ideas." ON public.ideas
 DROP POLICY IF EXISTS "Users can delete their own ideas." ON public.ideas;
 CREATE POLICY "Users can delete their own ideas." ON public.ideas
     FOR DELETE USING (auth.uid() = user_id);
+
+-- 5. Create Chat Messages Table
+CREATE TABLE IF NOT EXISTS public.chat_messages (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    idea_id UUID REFERENCES public.ideas(id) ON DELETE CASCADE,
+    expert_name TEXT NOT NULL,
+    role TEXT CHECK (role IN ('user', 'assistant')),
+    content TEXT NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.chat_messages ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Users can view their own chat messages." ON public.chat_messages;
+CREATE POLICY "Users can view their own chat messages." ON public.chat_messages
+    FOR SELECT USING (
+        EXISTS (
+            SELECT 1 FROM public.ideas 
+            WHERE ideas.id = chat_messages.idea_id 
+            AND ideas.user_id = auth.uid()
+        )
+    );
+
+DROP POLICY IF EXISTS "Users can insert their own chat messages." ON public.chat_messages;
+CREATE POLICY "Users can insert their own chat messages." ON public.chat_messages
+    FOR INSERT WITH CHECK (
+        EXISTS (
+            SELECT 1 FROM public.ideas 
+            WHERE ideas.id = chat_messages.idea_id 
+            AND ideas.user_id = auth.uid()
+        )
+    );
+

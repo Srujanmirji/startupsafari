@@ -13,40 +13,70 @@ const chatWithExpert = async (req, res) => {
     const { idea_id, expert_name, message, history } = req.body;
     const userId = req.user.id;
 
-    // 1. Verify idea belongs to user
-    const { data: idea, error: ideaError } = await supabaseAdmin
-      .from('ideas')
-      .select('*')
-      .eq('id', idea_id)
-      .eq('user_id', userId)
-      .single();
+    // 1. Fetch Idea and Analysis Context
+    let idea = { title: "Your Startup", description: "" };
+    let analysis = null;
+    
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (uuidRegex.test(idea_id)) {
+      // Fetch idea
+      const { data: ideaData } = await supabaseAdmin
+        .from('ideas')
+        .select('*')
+        .eq('id', idea_id)
+        .eq('user_id', userId)
+        .single();
+      
+      if (ideaData) idea = ideaData;
 
-    if (ideaError || !idea) {
-      return res.status(404).json({ error: 'Idea not found or unauthorized' });
+      // Fetch analysis results for context
+      const { data: analysisData } = await supabaseAdmin
+        .from('analysis_results')
+        .select('*')
+        .eq('idea_id', idea_id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+      
+      if (analysisData) analysis = analysisData;
     }
 
+    // 2. Build Context-Aware System Prompt
+    const expertScore = analysis ? (analysis[`${expert_name.toLowerCase()}_score`] || analysis.final_score) : 70;
+    
     const systemPrompt = `
       You are the ${expert_name} expert from the StartupSafari panel.
+      
       Your personality and focus:
-      - Fox: Analytical, logical, skeptical.
-      - Owl: Market-focused, numbers-driven, competitive landscape.
-      - Shark: Monetization, pricing, profit-obsessed.
-      - Bee: Customer demand, validation, user-centric.
-      - Elephant: Long-term vision, scalability, global reach.
-      - Wolf: Strategy, competitive moat, defensibility.
-      - Cheetah: Speed, execution, MVP focus.
-      - Peacock: Branding, storytelling, pitch clarity.
-      - Beaver: Technical build, architecture,feasibility.
-      - Eagle: Macro-strategy, industry disruption.
+      - Fox (Viability): Analytical, logical, skeptical. Looks for "why this might fail".
+      - Owl (Market): Market-focused, numbers-driven, competitive landscape.
+      - Shark (Monetization): Ruthless about pricing, margins, and profit.
+      - Bee (Demand): Obsessed with user validation, pain points, and customer "pull".
+      - Elephant (Scale): Infrastructure, global reach, long-term operations.
+      - Wolf (Strategy): Competitive moats, defensibility, unfair advantages.
+      - Cheetah (Velocity): Speed to market, lean MVP focus, rapid iteration.
+      - Peacock (Branding): Storytelling, pitch clarity, visual identity.
+      - Beaver (Technical): Feasibility, tech stack, architecture.
+      - Eagle (Vision): Macro-disruption, industry shifts, long-term impact.
 
-      The user's startup idea is:
+      CONTEXT FOR THIS STARTUP:
       Title: ${idea.title}
       Description: ${idea.description || idea.idea || ''}
+      
+      YOUR ANALYSIS OF THIS IDEA:
+      Your specific Safari Score for this area is: ${expertScore}/100.
+      ${analysis ? `
+      Overall Strengths: ${analysis.strengths?.join(', ')}
+      Overall Weaknesses: ${analysis.weaknesses?.join(', ')}
+      ` : ''}
 
-      Engage in a helpful, professional, and persona-driven conversation. Keep answers concise but insightful.
+      INSTRUCTIONS:
+      - Engage in a helpful, persona-driven conversation.
+      - Be consistent with your ${expert_name} persona. If your score is low (<60), be more critical/concerned. If high (>85), be encouraging but push for even more.
+      - Keep answers concise (max 3-4 sentences per response).
     `;
 
-    // 2. Prepare AI model and prompt
+    // 3. Prepare AI model and prompt
     const genAI = GET_GEN_AI();
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
     
@@ -61,23 +91,48 @@ const chatWithExpert = async (req, res) => {
     }
     fullPrompt += `User: ${message}\nExpert:`;
 
-    // 3. Call Gemini
-    const result = await model.generateContent(fullPrompt);
-    const response = await result.response;
-    const text = response.text();
+    // 4. Call Gemini
+    let text;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const result = await model.generateContent(fullPrompt);
+        const response = await result.response;
+        text = response.text();
+        break;
+      } catch (aiError) {
+        const isRateLimit = aiError.message?.includes('429') || aiError.message?.includes('RESOURCE_EXHAUSTED') || aiError.status === 429;
+        if (isRateLimit && attempt < 2) {
+          const wait = (attempt + 1) * 5000;
+          await new Promise(r => setTimeout(r, wait));
+        } else {
+          throw aiError;
+        }
+      }
+    }
 
-    // 4. Save messages to DB
-    supabaseAdmin.from('chat_messages').insert([
-      { idea_id, expert_name, role: 'user', content: message },
-      { idea_id, expert_name, role: 'assistant', content: text }
-    ]).then(({ error }) => {
-      if (error) console.error('Error saving chat:', error);
-    });
+    if (!text) {
+      return res.status(503).json({ error: "AI is busy. Try again." });
+    }
+
+    // 5. Save messages to DB (non-blocking)
+    if (uuidRegex.test(idea_id)) {
+      supabaseAdmin.from('chat_messages').insert([
+        { idea_id, expert_name, role: 'user', content: message },
+        { idea_id, expert_name, role: 'assistant', content: text }
+      ]).then(({ error }) => {
+        if (error) console.error('Error saving chat:', error);
+      });
+    }
 
     res.json({ response: text });
 
+
   } catch (error) {
-    console.error("Chat Expert Error:", error);
+    console.error("Chat Expert Error:", error.message);
+    const isRateLimit = error.message?.includes('429') || error.message?.includes('RESOURCE_EXHAUSTED');
+    if (isRateLimit) {
+      return res.status(429).json({ error: "The AI experts are too busy right now. Please wait 30 seconds and try again." });
+    }
     res.status(500).json({ error: "Failed to communicate with expert", details: error.message });
   }
 };
@@ -85,12 +140,13 @@ const chatWithExpert = async (req, res) => {
 const sharkTankSession = async (req, res) => {
   try {
     const { idea_id, message, history } = req.body;
+    const userId = req.user?.id;
     
     const systemPrompt = `
       You are 'The Shark' from the StartupSafari panel. You act exactly like a ruthless, numbers-obsessed venture capitalist from the show Shark Tank.
       You are highly critical, aggressive, and demand hard numbers (CAC, LTV, Margins, Market Size).
       You tear apart weak ideas and demand defensibility.
-      If the user gives a good answer with numbers and logic, you showing grudging respect.
+      If the user gives a good answer with numbers and logic, you show grudging respect.
       Keep your responses extremely concise (2-3 sentences max) to simulate a real rapid-fire pitch environment.
       Always end with a tough question or a demand for clarification.
     `;
@@ -114,6 +170,15 @@ const sharkTankSession = async (req, res) => {
     const response = await result.response;
     const text = response.text();
 
+    // Save to DB if possible
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (idea_id && uuidRegex.test(idea_id)) {
+      supabaseAdmin.from('chat_messages').insert([
+        { idea_id, expert_name: 'SharkTank', role: 'user', content: message },
+        { idea_id, expert_name: 'SharkTank', role: 'assistant', content: text }
+      ]).then(({ error }) => { if (error) console.error('Error saving shark chat:', error); });
+    }
+
     res.json({ response: text });
 
   } catch (error) {
@@ -122,7 +187,42 @@ const sharkTankSession = async (req, res) => {
   }
 };
 
+const getChatHistory = async (req, res) => {
+  try {
+    const { idea_id, expert_name } = req.params;
+    const userId = req.user.id;
+
+    // Verify ownership of idea
+    const { data: idea, error: ideaErr } = await supabaseAdmin
+      .from('ideas')
+      .select('id')
+      .eq('id', idea_id)
+      .eq('user_id', userId)
+      .single();
+
+    if (ideaErr || !idea) {
+      return res.status(403).json({ error: "Unauthorized access to this chat history" });
+    }
+
+    const { data, error } = await supabaseAdmin
+      .from('chat_messages')
+      .select('role, content, created_at')
+      .eq('idea_id', idea_id)
+      .eq('expert_name', expert_name)
+      .order('created_at', { ascending: true });
+
+    if (error) throw error;
+
+    res.json(data);
+  } catch (error) {
+    console.error("Get Chat History Error:", error);
+    res.status(500).json({ error: "Failed to fetch chat history" });
+  }
+};
+
 module.exports = {
   chatWithExpert,
-  sharkTankSession
+  sharkTankSession,
+  getChatHistory
 };
+

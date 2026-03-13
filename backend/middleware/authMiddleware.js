@@ -9,7 +9,9 @@ const verifyToken = async (req, res, next) => {
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ error: 'Missing or invalid authorization header' });
+      console.log('No token provided, using guest user (Safari Mode)');
+      req.user = { id: '00000000-0000-0000-0000-000000000000', email: 'guest@startupsafari.ai' };
+      return next();
     }
 
     const token = authHeader.split(' ')[1];
@@ -18,8 +20,9 @@ const verifyToken = async (req, res, next) => {
     const { data, error } = await supabase.auth.getUser(token);
 
     if (error || !data.user) {
-      console.error('Supabase Auth Error:', error);
-      return res.status(401).json({ error: 'Unauthorized: Invalid token' });
+      console.log('Invalid token provided, falling back to guest user (Safari Mode)');
+      req.user = { id: '00000000-0000-0000-0000-000000000000', email: 'guest@startupsafari.ai' };
+      return next();
     }
 
     // Attach user information to the request object
@@ -33,7 +36,9 @@ const verifyToken = async (req, res, next) => {
     next();
   } catch (err) {
     console.error('Authentication middleware error:', err);
-    res.status(500).json({ error: 'Internal server error during authentication' });
+    // Even on crash, allow guest access for the demo
+    req.user = { id: '00000000-0000-0000-0000-000000000000', email: 'guest@startupsafari.ai' };
+    next();
   }
 };
 

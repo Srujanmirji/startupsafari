@@ -47,8 +47,12 @@ function AnalysisContent() {
         await new Promise(r => setTimeout(r, 1500));
       }
       
-      setStatus("Finalizing report...");
-      await api.startAnalysis(ideaId);
+      setStatus("Running AI-powered analysis...");
+      
+      // Get deep dive answers from the cached idea
+      const deepDiveAnswers = data?.deepDiveAnswers || {};
+      
+      await api.startAnalysis(ideaId, deepDiveAnswers);
       router.push(`/results?id=${ideaId}`);
     };
 

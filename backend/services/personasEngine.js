@@ -15,14 +15,29 @@ const PERSONA_PROMPTS = {
   eagle: "Evaluate big-picture strategy and macro-industry disruption potential."
 };
 
-const analyzeWithPersonas = async (idea) => {
+const analyzeWithPersonas = async (idea, questionnaireAnswers = {}) => {
   try {
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+
+    // Build questionnaire context if available
+    let questionnaireContext = "";
+    if (questionnaireAnswers && Object.keys(questionnaireAnswers).length > 0) {
+      questionnaireContext = `
+      Market Validation Questionnaire Responses:
+      - Problem being solved: ${questionnaireAnswers.problem || 'Not provided'}
+      - Ideal first customer: ${questionnaireAnswers.audience || 'Not provided'}
+      - Solution in one sentence: ${questionnaireAnswers.solution || 'Not provided'}
+      - Revenue model: ${questionnaireAnswers.revenue || 'Not provided'}
+      - Competitors & differentiation: ${questionnaireAnswers.competition || 'Not provided'}
+      - Current traction: ${questionnaireAnswers.traction || 'Not provided'}
+      `;
+    }
 
     const prompt = `
       You are a panel of elite startup experts. Analyze the following startup idea:
       Title: ${idea.title || 'Untitled Idea'}
       Description: ${idea.description || idea.idea || ''}
+      ${questionnaireContext}
       
       Tasks:
       1. For each of the following 10 experts, provide a score (0-100) and a brief 1-sentence insight.

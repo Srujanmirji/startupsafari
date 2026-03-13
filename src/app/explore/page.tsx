@@ -87,15 +87,18 @@ export default function ExploreFeatures() {
       color: "text-fuchsia-400",
       bg: "bg-fuchsia-400/10",
       link: "/dashboard"
+    },
+    {
+      title: "The Shark Tank",
+      description: "Enter a live chat room and defend your startup against the ruthless Shark persona.",
+      icon: ShieldAlert,
+      color: "text-rose-500",
+      bg: "bg-rose-500/10",
+      link: "/dashboard"
     }
   ];
 
   const UPCOMING_FEATURES = [
-    {
-      title: "The Shark Tank (Mock Pitch)",
-      description: "Enter a live chat room and defend your startup against the ruthless Shark persona.",
-      icon: ShieldAlert,
-    },
     {
       title: "Financial Projections",
       description: "Generate automated 3-year P&L tables, CAC, LTV, and break-even analysis.",

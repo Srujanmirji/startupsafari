@@ -52,12 +52,27 @@ export function Navbar() {
               </Link>
             </>
           ) : (
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-4">
               <Link 
-                href="/submit" 
-                className="text-xs sm:text-sm font-bold px-4 sm:px-5 py-2 sm:py-2.5 rounded-full bg-white text-black hover:bg-zinc-200 transition-colors"
+                href="/dashboard" 
+                className="hidden sm:block text-xs sm:text-sm font-bold px-4 sm:px-5 py-2 sm:py-2.5 rounded-full bg-white text-black hover:bg-zinc-200 transition-colors"
               >
                 Dashboard
+              </Link>
+              <Link
+                href="/profile"
+                className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-zinc-800 border border-white/10 flex items-center justify-center overflow-hidden hover:border-electric-blue transition-colors group"
+                title="Profile"
+              >
+                { (user?.picture || user?.user_metadata?.avatar_url || user?.avatar_url || user?.image) ? (
+                  <img 
+                    src={user?.picture || user?.user_metadata?.avatar_url || user?.avatar_url || user?.image} 
+                    alt="" 
+                    className="w-full h-full object-cover" 
+                  />
+                ) : (
+                  <UserIcon className="w-4 h-4 sm:w-5 sm:h-5 text-zinc-400 group-hover:text-white transition-colors" />
+                )}
               </Link>
               <button 
                 onClick={() => signOut()}
@@ -79,9 +94,22 @@ export function Navbar() {
 
       {/* Mobile Menu Overlay */}
       {isOpen && (
-        <div className="md:hidden absolute top-20 left-0 w-full bg-brand-deep border-b border-white/10 p-6 flex flex-col gap-6 animate-in slide-in-from-top duration-300">
-          <Link href="/explore" onClick={() => setIsOpen(false)} className="text-lg font-medium text-zinc-300">Features Hub</Link>
-          <Link href="/login" onClick={() => setIsOpen(false)} className="text-lg font-medium text-zinc-300">Sign In</Link>
+        <div className="md:hidden absolute top-20 left-0 w-full bg-[#05050f] border-b border-white/10 p-6 flex flex-col gap-6 animate-in slide-in-from-top duration-300">
+          <Link href="/explore" onClick={() => setIsOpen(false)} className="text-lg font-bold text-zinc-300">Features Hub</Link>
+          {user ? (
+            <>
+              <Link href="/dashboard" onClick={() => setIsOpen(false)} className="text-lg font-bold text-zinc-300">Dashboard</Link>
+              <Link href="/profile" onClick={() => setIsOpen(false)} className="text-lg font-bold text-zinc-300">My Profile</Link>
+              <button 
+                onClick={() => { signOut(); setIsOpen(false); }} 
+                className="text-left text-lg font-bold text-rose-500"
+              >
+                Sign Out
+              </button>
+            </>
+          ) : (
+            <Link href="/login" onClick={() => setIsOpen(false)} className="text-lg font-bold text-zinc-300">Sign In</Link>
+          )}
         </div>
       )}
 

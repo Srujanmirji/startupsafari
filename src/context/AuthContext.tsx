@@ -13,6 +13,7 @@ interface AuthContextType {
   verifyOtp: (email: string, token: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   setLocalUser: (user: any) => void;
+  updateUserMetadata: (metadata: any) => Promise<{ error: any }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -98,8 +99,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut();
   };
 
+  const updateUserMetadata = async (metadata: any) => {
+    if (localStorage.getItem("google_user")) {
+      const googleUser = JSON.parse(localStorage.getItem("google_user") || "{}");
+      const updated = { ...googleUser, ...metadata };
+      localStorage.setItem("google_user", JSON.stringify(updated));
+      setUser(updated);
+      return { error: null };
+    }
+
+    if (!supabase) return { error: { message: "Auth is not configured." } };
+    
+    const { data, error } = await supabase.auth.updateUser({
+      data: metadata
+    });
+
+    if (!error && data.user) {
+      setUser(data.user);
+    }
+    
+    return { error };
+  };
+
   return (
-    <AuthContext.Provider value={{ user, session, isLoading, signInWithGoogle, signInWithOtp, verifyOtp, signOut, setLocalUser }}>
+    <AuthContext.Provider value={{ user, session, isLoading, signInWithGoogle, signInWithOtp, verifyOtp, signOut, setLocalUser, updateUserMetadata }}>
       {children}
     </AuthContext.Provider>
   );
