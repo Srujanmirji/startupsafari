@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
 interface ScoreBarProps {
@@ -28,33 +29,46 @@ export function ScoreBar({ score, label }: ScoreBarProps) {
 }
 
 export function ViabilityDisplay({ score }: { score: number }) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 640); // Tailwind's 'sm' breakpoint is 640px
+    };
+
+    checkMobile(); // Set initial value
+    window.addEventListener("resize", checkMobile); // Update on resize
+
+    return () => window.removeEventListener("resize", checkMobile); // Cleanup
+  }, []);
+
   return (
     <div className="p-8 rounded-3xl bg-brand-purple/20 border border-white/10 backdrop-blur-xl neon-border">
       <h3 className="text-3xl font-bold text-white mb-8 text-center font-heading">Startup Viability Score</h3>
       
-      <div className="flex justify-center mb-10">
-        <div className="relative w-48 h-48 flex items-center justify-center">
+      <div className="flex justify-center mb-6 sm:mb-10">
+        <div className="relative w-32 h-32 sm:w-48 sm:h-48 flex items-center justify-center">
             {/* SVG Circle for progress */}
             <svg className="w-full h-full transform -rotate-90">
                 <circle
-                    cx="96"
-                    cy="96"
-                    r="88"
+                    cx={isMobile ? "64" : "96"}
+                    cy={isMobile ? "64" : "96"}
+                    r={isMobile ? "58" : "88"}
                     stroke="currentColor"
-                    strokeWidth="8"
+                    strokeWidth="6"
                     fill="transparent"
                     className="text-white/5"
                 />
                 <motion.circle
-                    cx="96"
-                    cy="96"
-                    r="88"
+                    cx={isMobile ? "64" : "96"}
+                    cy={isMobile ? "64" : "96"}
+                    r={isMobile ? "58" : "88"}
                     stroke="currentColor"
-                    strokeWidth="12"
+                    strokeWidth={isMobile ? "8" : "12"}
                     fill="transparent"
-                    strokeDasharray={552.92}
-                    initial={{ strokeDashoffset: 552.92 }}
-                    whileInView={{ strokeDashoffset: 552.92 * (1 - score / 100) }}
+                    strokeDasharray={isMobile ? 364.42 : 552.92}
+                    initial={{ strokeDashoffset: isMobile ? 364.42 : 552.92 }}
+                    whileInView={{ strokeDashoffset: (isMobile ? 364.42 : 552.92) * (1 - score / 100) }}
                     viewport={{ once: true }}
                     transition={{ duration: 1.5, ease: "easeOut" }}
                     className="text-violet-glow drop-shadow-[0_0_10px_rgba(139,92,246,0.5)]"
@@ -62,22 +76,22 @@ export function ViabilityDisplay({ score }: { score: number }) {
                 />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-6xl font-bold text-white">{score}</span>
-                <span className="text-zinc-500 text-sm font-semibold uppercase tracking-widest">Score</span>
+                <span className={`${isMobile ? 'text-3xl' : 'text-6xl'} font-bold text-white`}>{score}</span>
+                <span className="text-zinc-500 text-[10px] sm:text-sm font-semibold uppercase tracking-widest">Score</span>
             </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {[
           { label: "Market size", score: 85, color: "text-blue-400" },
           { label: "Competitors", score: 62, color: "text-purple-400" },
           { label: "Monetization", score: 78, color: "text-cyan-400" },
           { label: "Viral Potential", score: 91, color: "text-emerald-400" },
         ].map((item, i) => (
-          <div key={i} className="text-center p-4 rounded-2xl bg-white/5 border border-white/5">
-            <div className={`text-xl font-bold ${item.color} mb-1`}>{item.score}%</div>
-            <div className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">{item.label}</div>
+          <div key={i} className="text-center p-3 sm:p-4 rounded-2xl bg-white/5 border border-white/5">
+            <div className={`text-lg sm:text-xl font-bold ${item.color} mb-1`}>{item.score}%</div>
+            <div className="text-[9px] sm:text-[10px] text-zinc-500 font-bold uppercase tracking-wider">{item.label}</div>
           </div>
         ))}
       </div>

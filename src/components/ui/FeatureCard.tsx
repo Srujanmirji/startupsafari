@@ -1,17 +1,17 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { LucideIcon } from "lucide-react";
+import { ReactNode } from "react";
 
 interface FeatureCardProps {
   step: number;
   title: string;
   description: string;
-  icon: LucideIcon;
+  icon: ReactNode;
   delay?: number;
 }
 
-export function FeatureCard({ step, title, description, icon: Icon, delay = 0 }: FeatureCardProps) {
+export function FeatureCard({ step, title, description, icon, delay = 0 }: FeatureCardProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -25,7 +25,7 @@ export function FeatureCard({ step, title, description, icon: Icon, delay = 0 }:
         {step}
       </div>
       <div className="mb-6 w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center text-electric-blue group-hover:scale-110 transition-transform duration-300">
-        <Icon className="w-7 h-7" />
+        {icon}
       </div>
       <h3 className="text-2xl font-bold mb-4 text-white font-heading tracking-tight">{title}</h3>
       <p className="text-zinc-400 leading-relaxed">{description}</p>

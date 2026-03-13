@@ -54,3 +54,24 @@
 .hero-gradient {
   background: radial-gradient(circle at center, rgba(59, 130, 246, 0.15) 0%, rgba(5, 5, 15, 0) 70%);
 }
+
+/* Lenis base smooth scrolling CSS */
+html.lenis, html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}

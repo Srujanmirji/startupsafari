@@ -90,200 +90,228 @@ export default function Home() {
         <HeroSection />
 
         {/* HOW IT WORKS */}
-        <section id="how-it-works" className="py-32 relative bg-[#05050f]">
+        <section id="how-it-works" className="py-20 sm:py-28 lg:py-32 relative bg-[#05050f]">
           <div className="max-w-7xl mx-auto px-6">
-            <div className="text-center mb-20">
-              <motion.h2 
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="text-4xl md:text-6xl font-bold text-white mb-6 font-heading"
-              >
-                How <span className="text-gradient">StartupSafari</span> Works
-              </motion.h2>
-              <motion.p 
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.1 }}
-                className="text-zinc-400 text-lg max-w-2xl mx-auto"
-              >
-                Our AI-driven process is designed to give you a definitive answer on your startup idea within minutes, not months.
-              </motion.p>
-            </div>
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.8 }}
+              className="text-center mb-12 sm:mb-16 lg:mb-20"
+            >
+              <h2 className="text-3xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 font-heading">
+                The Safari <span className="text-gradient">Process</span>
+              </h2>
+              <p className="text-zinc-400 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
+                We take your startup idea through three critical stages of evolution before it ever hits the market.
+              </p>
+            </motion.div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-              <FeatureCard 
-                step={1}
-                icon={Lightbulb}
-                title="Submit your startup idea"
-                description="Simply describe your problem, solution, and target audience. Our AI handles the initial information gathering."
-                delay={0.1}
-              />
-              <FeatureCard 
-                step={2}
-                icon={Search}
-                title="AI experts analyze your idea"
-                description="8 specialized animal personas simulate different market conditions and stress-test your business model."
-                delay={0.2}
-              />
-              <FeatureCard 
-                step={3}
-                icon={BarChart3}
-                title="Receive viability score"
-                description="Get a comprehensive report with numerical scores, risks, and actionable insights to pivot or proceed."
-                delay={0.3}
-              />
-            </div>
-          </div>
-        </section>
-
-        {/* AI EXPERT PANEL */}
-        <section id="experts" className="py-32 relative overflow-hidden">
-          {/* Background Ambient Glow */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-violet-glow/10 blur-[120px] rounded-full pointer-events-none"></div>
-          
-          <div className="max-w-7xl mx-auto px-6 relative z-10">
-            <div className="flex flex-col md:flex-row md:items-end justify-between mb-20 gap-8">
-              <div className="max-w-2xl">
-                <motion.h2 
-                  initial={{ opacity: 0, x: -20 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  className="text-4xl md:text-6xl font-bold text-white mb-6 font-heading"
+            <motion.div 
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, margin: "-50px" }}
+              variants={{
+                hidden: { opacity: 0 },
+                show: {
+                  opacity: 1,
+                  transition: { staggerChildren: 0.2 }
+                }
+              }}
+              className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8"
+            >
+              {[
+                { step: 1, icon: <Rocket className="w-6 h-6" />, title: "Idea Submission", desc: "Feed our experts your dream. Tell us the problem, your solution, and who you're building for." },
+                { step: 2, icon: <BarChart3 className="w-6 h-6" />, title: "Expert Safari", desc: "8 animal personas stress-test every angle of your business from logic to long-term vision." },
+                { step: 3, icon: <Zap className="w-6 h-6" />, title: "Viability Score", desc: "Get a crystal clear analysis and a score out of 100 to guide your next move." }
+              ].map((item, i) => (
+                <motion.div
+                  key={i}
+                  variants={{
+                    hidden: { opacity: 0, y: 20 },
+                    show: { opacity: 1, y: 0 }
+                  }}
                 >
-                  Meet your <br /><span className="text-gradient">AI Expert Panel</span>
-                </motion.h2>
-                <motion.p 
-                   initial={{ opacity: 0, x: -20 }}
-                   whileInView={{ opacity: 1, x: 0 }}
-                   viewport={{ once: true }}
-                   transition={{ delay: 0.1 }}
-                   className="text-zinc-400 text-lg"
-                >
-                  Eight distinct AI personas, each programmed with the knowledge of thousands of successful and failed startups.
-                </motion.p>
-              </div>
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-              >
-                <Link href="/signup" className="group flex items-center gap-2 text-white font-bold bg-white/5 border border-white/10 px-6 py-3 rounded-2xl hover:bg-white/10 transition-all">
-                  View Full Personas
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </Link>
-              </motion.div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {PERSONAS.map((persona, i) => (
-                <PersonaCard key={i} {...persona} delay={i * 0.05} />
+                  <FeatureCard 
+                    step={item.step}
+                    icon={item.icon}
+                    title={item.title}
+                    description={item.desc}
+                  />
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           </div>
         </section>
 
-        {/* SCORE DEMO */}
-        <section id="demo" className="py-32 bg-[#05050f]">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-              <div>
-                <motion.h2 
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  className="text-4xl md:text-5xl font-bold text-white mb-8 font-heading"
+        {/* EXPERT PANEL */}
+        <section id="experts" className="py-20 sm:py-28 lg:py-32 relative overflow-hidden bg-glass-dark">
+          <div className="max-w-7xl mx-auto px-6 relative z-10">
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.8 }}
+              className="text-center mb-12 sm:mb-16 lg:mb-20"
+            >
+              <h2 className="text-3xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 font-heading">The AI <span className="text-gradient">Expert Panel</span></h2>
+              <p className="text-zinc-400 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">Meet the hunters who will stress-test your idea from every possible angle.</p>
+            </motion.div>
+            
+            <motion.div 
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, margin: "-50px" }}
+              variants={{
+                hidden: { opacity: 0 },
+                show: {
+                  opacity: 1,
+                  transition: { staggerChildren: 0.05 }
+                }
+              }}
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+            >
+              {PERSONAS.map((persona, i) => (
+                <motion.div
+                  key={persona.name}
+                  variants={{
+                    hidden: { opacity: 0, scale: 0.9 },
+                    show: { opacity: 1, scale: 1 }
+                  }}
                 >
-                  Get deep, <br /><span className="text-gradient">data-backed</span> results.
-                </motion.h2>
-                <div className="space-y-10">
+                  <PersonaCard {...persona} index={i} />
+                </motion.div>
+              ))}
+            </motion.div>
+          </div>
+        </section>
+
+        {/* DEMO SECTION */}
+        <section id="demo" className="py-20 sm:py-28 lg:py-32 bg-[#05050f]">
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 sm:gap-20 items-center">
+              <motion.div
+                initial={{ opacity: 0, x: -50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.8 }}
+              >
+                <h2 className="text-3xl sm:text-5xl lg:text-6xl font-bold text-white mb-8 font-heading leading-tight">
+                  See your <span className="text-gradient">Viability</span> <br /> in real-time.
+                </h2>
+                <p className="text-zinc-400 text-base sm:text-lg mb-10 leading-relaxed max-w-lg">
+                  No more guessing. Our experts provide numeric scores and qualitative feedback used by successful founders to pivot or persevere.
+                </p>
+                
+                <div className="space-y-6">
                   {[
-                    { title: "Numerical Viability Score", desc: "A combined score out of 100 based on all 8 expert reviews.", icon: Target },
-                    { title: "Persona-Specific Feedback", desc: "Read exactly what the Fox or the Shark thinks of your idea.", icon: Zap },
-                    { title: "Risk Identification", desc: "Identify hidden bottlenecks and competition risks early.", icon: ShieldCheck },
+                    { title: "Risk Mitigation", desc: "Identify structural flaws before spending a dime.", icon: <ShieldCheck className="w-5 sm:w-6 h-5 sm:h-6 text-electric-blue" />, bg: "bg-electric-blue/10", border: "border-electric-blue/20" },
+                    { title: "Actionable Insights", desc: "Direct advice from specialized AI personas.", icon: <Lightbulb className="w-5 sm:w-6 h-5 sm:h-6 text-violet-glow" />, bg: "bg-violet-glow/10", border: "border-violet-glow/20" }
                   ].map((item, i) => (
                     <motion.div 
-                      key={i} 
-                      className="flex gap-6"
+                      key={i}
                       initial={{ opacity: 0, x: -20 }}
                       whileInView={{ opacity: 1, x: 0 }}
                       viewport={{ once: true }}
-                      transition={{ delay: i * 0.1 }}
+                      transition={{ delay: 0.3 + (i * 0.1) }}
+                      className="flex items-center gap-4"
                     >
-                      <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-electric-blue">
-                        <item.icon className="w-6 h-6" />
+                      <div className={`w-10 sm:w-12 h-10 sm:h-12 rounded-xl ${item.bg} flex items-center justify-center border ${item.border}`}>
+                        {item.icon}
                       </div>
                       <div>
-                        <h4 className="text-white font-bold text-lg mb-2">{item.title}</h4>
-                        <p className="text-zinc-500 text-sm leading-relaxed">{item.desc}</p>
+                        <h4 className="text-white font-bold text-base sm:text-lg">{item.title}</h4>
+                        <p className="text-zinc-500 text-sm">{item.desc}</p>
                       </div>
                     </motion.div>
                   ))}
                 </div>
-              </div>
+              </motion.div>
               
               <motion.div
-                initial={{ opacity: 0, rotateY: 20, rotateX: 10, scale: 0.95 }}
-                whileInView={{ opacity: 1, rotateY: 0, rotateX: 0, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 1.2, ease: "circOut" }}
-                className="perspective-1000"
+                initial={{ opacity: 0, scale: 0.9, rotateY: 10 }}
+                whileInView={{ opacity: 1, scale: 1, rotateY: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 1, ease: "easeOut" }}
+                className="w-full flex justify-center lg:justify-end"
               >
-                <ViabilityDisplay score={78} />
+                <ViabilityDisplay score={86} />
               </motion.div>
             </div>
           </div>
         </section>
 
-        {/* WHY STARTUPSAFARI */}
-        <section className="py-32 relative border-t border-white/5 overflow-hidden">
+        {/* WHY SECTION */}
+        <section className="py-20 sm:py-28 lg:py-32 relative border-t border-white/5 bg-glass-dark">
           <div className="max-w-7xl mx-auto px-6">
-            <div className="text-center mb-20">
-              <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 font-heading">Why StartupSafari?</h2>
-              <p className="text-zinc-500 max-w-xl mx-auto">The difference between a multi-million dollar exit and a failed project is validation.</p>
-            </div>
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-center mb-12 sm:mb-16 lg:mb-20"
+            >
+              <h2 className="text-3xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 font-heading">Why StartupSafari?</h2>
+              <p className="text-zinc-500 text-base sm:text-lg max-w-xl mx-auto">The difference between a multi-million dollar exit and a failed project is validation.</p>
+            </motion.div>
             
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <motion.div 
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true }}
+              variants={{
+                hidden: { opacity: 0 },
+                show: {
+                  opacity: 1,
+                  transition: { staggerChildren: 0.1 }
+                }
+              }}
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8"
+            >
               {[
-                { title: "Avoid failed ideas", icon: Rocket, text: "Stop wasting months on ideas that don't have a market." },
-                { title: "Instant Analysis", icon: Clock, text: "Get results in minutes, allowing you to iterate faster." },
-                { title: "Clear Insights", icon: BarChart3, text: "Understand exactly where your business model is weak." },
-                { title: "Build with Confidence", icon: CheckCircle2, text: "Enter development knowing there's real demand." },
+                { title: "Avoid failed ideas", icon: <Rocket className="w-10 h-10" />, text: "Stop wasting months on ideas that don't have a market." },
+                { title: "Instant Analysis", icon: <Clock className="w-10 h-10" />, text: "Get results in minutes, allowing you to iterate faster." },
+                { title: "Clear Insights", icon: <BarChart3 className="w-10 h-10" />, text: "Understand exactly where your business model is weak." },
+                { title: "Build with Confidence", icon: <CheckCircle2 className="w-10 h-10" />, text: "Enter development knowing there's real demand." },
               ].map((item, i) => (
                 <motion.div 
                   key={i} 
+                  variants={{
+                    hidden: { opacity: 0, y: 20 },
+                    show: { opacity: 1, y: 0 }
+                  }}
                   className="p-8 rounded-3xl bg-white/5 border border-white/5 hover:bg-white/[0.07] transition-colors"
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.1 }}
                 >
-                  <item.icon className="w-10 h-10 text-violet-glow mb-6" />
+                  <div className="text-violet-glow mb-6">{item.icon}</div>
                   <h4 className="text-white font-bold mb-4">{item.title}</h4>
-                  <p className="text-zinc-500 text-sm">{item.text}</p>
+                  <p className="text-zinc-500 text-sm leading-relaxed">{item.text}</p>
                 </motion.div>
               ))}
-            </div>
+            </motion.div>
           </div>
         </section>
 
         {/* FINAL CTA */}
-        <section className="py-32 relative">
+        <section className="py-20 sm:py-32 relative">
            <div className="max-w-4xl mx-auto px-6 text-center">
-              <div className="p-16 rounded-[3rem] bg-gradient-to-br from-electric-blue/20 to-violet-glow/20 border border-white/10 relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-8">
-                   <Zap className="w-24 h-24 text-white/5 rotate-12" />
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8 }}
+                className="p-10 sm:p-16 rounded-[2rem] sm:rounded-[3rem] bg-gradient-to-br from-electric-blue/20 to-violet-glow/20 border border-white/10 relative overflow-hidden"
+              >
+                <div className="absolute top-0 right-0 p-8 opacity-20 sm:opacity-100">
+                   <Zap className="w-24 h-24 text-white/10 rotate-12" />
                 </div>
-                <h2 className="text-4xl md:text-6xl font-bold text-white mb-8 font-heading">Ready to hunt for <br />your next winner?</h2>
+                <h2 className="text-3xl sm:text-5xl lg:text-6xl font-bold text-white mb-8 font-heading">Ready to hunt for <br />your next winner?</h2>
                 <Link 
                   href="/submit" 
-                  className="inline-flex items-center gap-2 bg-white text-black px-10 py-5 rounded-full font-bold text-xl hover:bg-zinc-200 transition-all hover:scale-105 shadow-[0_0_30px_rgba(255,255,255,0.4)]"
+                  className="inline-flex items-center gap-2 bg-white text-black px-8 sm:px-10 py-4 sm:py-5 rounded-full font-bold text-lg sm:text-xl hover:bg-zinc-200 transition-all hover:scale-105 shadow-[0_0_30px_rgba(255,255,255,0.4)]"
                 >
                   Get Started for Free
                   <ArrowRight className="w-6 h-6" />
                 </Link>
-              </div>
+              </motion.div>
            </div>
         </section>
       </main>
