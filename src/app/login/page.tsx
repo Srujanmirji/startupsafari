@@ -7,6 +7,8 @@ import Link from "next/link";
 import React, { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 
+import { AuroraBackground } from "@/components/ui/AuroraBackground";
+
 export default function Login() {
   const [isHovered, setIsHovered] = useState(false);
   const [email, setEmail] = useState("");
@@ -57,24 +59,7 @@ export default function Login() {
   return (
     <div className="min-h-screen bg-[#05050f] text-white overflow-hidden relative font-sans flex flex-col">
       <Navbar />
-      
-      {/* Animated Background Orbs */}
-      <motion.div 
-        animate={{ 
-          scale: [1, 1.2, 1],
-          opacity: [0.3, 0.5, 0.3],
-        }}
-        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-        className="fixed top-20 right-[-10%] w-[600px] h-[600px] bg-electric-blue/20 blur-[150px] rounded-full pointer-events-none"
-      />
-      <motion.div 
-        animate={{ 
-          scale: [1, 1.3, 1],
-          opacity: [0.2, 0.4, 0.2],
-        }}
-        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-        className="fixed bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-violet-glow/20 blur-[150px] rounded-full pointer-events-none"
-      />
+      <AuroraBackground />
 
       <main className="flex-grow flex items-center justify-center relative z-10 px-4 pt-24 pb-12 w-full [perspective:2000px]">
         
