@@ -12,9 +12,11 @@ const EXPERTS = [
   { name: "Owl", icon: "🦉", color: "#60a5fa" },
   { name: "Shark", icon: "🦈", color: "#a855f7" },
   { name: "Bee", icon: "🐝", color: "#f59e0b" },
+  { name: "Elephant", icon: "🐘", color: "#4b5563" },
   { name: "Wolf", icon: "🐺", color: "#9ca3af" },
   { name: "Cheetah", icon: "🐆", color: "#f97316" },
   { name: "Peacock", icon: "🦚", color: "#34d399" },
+  { name: "Beaver", icon: "🦫", color: "#8b5cf6" },
   { name: "Eagle", icon: "🦅", color: "#fbbf24" },
 ];
 
@@ -22,6 +24,7 @@ function AnalysisContent() {
   const searchParams = useSearchParams();
   const ideaId = searchParams.get("id");
   const [currentExpertIndex, setCurrentExpertIndex] = useState(0);
+  const [activeExperts, setActiveExperts] = useState<any[]>(EXPERTS);
   const [status, setStatus] = useState("Gathering Intelligence...");
   const router = useRouter();
 
@@ -29,10 +32,18 @@ function AnalysisContent() {
     if (!ideaId) return;
 
     const runAnalysis = async () => {
+      // Fetch idea to know selected experts
+      const { data } = await api.getResults(ideaId);
+      let expertsToRun = EXPERTS;
+      if (data && data.experts && data.experts.length > 0) {
+        expertsToRun = EXPERTS.filter(e => data.experts.includes(e.name));
+      }
+      setActiveExperts(expertsToRun);
+
       // Step through each expert visually
-      for (let i = 0; i < EXPERTS.length; i++) {
+      for (let i = 0; i < expertsToRun.length; i++) {
         setCurrentExpertIndex(i);
-        setStatus(`${EXPERTS[i].name} is analyzing...`);
+        setStatus(`${expertsToRun[i].name} is analyzing...`);
         await new Promise(r => setTimeout(r, 1500));
       }
       
@@ -68,12 +79,12 @@ function AnalysisContent() {
                     className="flex flex-col items-center"
                 >
                     <div className="text-7xl mb-6 filter drop-shadow-[0_0_20px_rgba(255,255,255,0.4)]">
-                        {EXPERTS[currentExpertIndex].icon}
+                        {activeExperts[currentExpertIndex]?.icon}
                     </div>
-                    <div className="text-2xl font-bold text-white mb-1">{EXPERTS[currentExpertIndex].name}</div>
+                    <div className="text-2xl font-bold text-white mb-1">{activeExperts[currentExpertIndex]?.name}</div>
                     <div 
                         className="text-sm font-bold uppercase tracking-widest"
-                        style={{ color: EXPERTS[currentExpertIndex].color }}
+                        style={{ color: activeExperts[currentExpertIndex]?.color }}
                     >
                         Active Evaluator
                     </div>
@@ -90,15 +101,15 @@ function AnalysisContent() {
             <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden border border-white/10">
                 <motion.div 
                     className="h-full bg-electric-blue shadow-[0_0_10px_rgba(59,130,246,0.5)]"
-                    animate={{ width: `${((currentExpertIndex + 1) / EXPERTS.length) * 100}%` }}
+                    animate={{ width: `${((currentExpertIndex + 1) / activeExperts.length) * 100}%` }}
                     transition={{ duration: 1 }}
                 />
             </div>
         </div>
 
-        <div className="mt-12 grid grid-cols-4 gap-4 opacity-40">
-            {EXPERTS.map((expert, i) => (
-                <div key={i} className={`text-2xl grayscale transition-all duration-500 ${i < currentExpertIndex ? "grayscale-0 opacity-100 scale-110" : ""}`}>
+        <div className="mt-12 grid grid-cols-5 sm:grid-cols-10 gap-4 opacity-40 place-items-center">
+            {activeExperts.map((expert, i) => (
+                <div key={i} className={`text-2xl grayscale transition-all duration-500 ${i < currentExpertIndex ? "grayscale-0 opacity-100 scale-110" : i === currentExpertIndex ? "grayscale-0 opacity-100 scale-125 animate-pulse drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]" : ""}`}>
                     {expert.icon}
                 </div>
             ))}

@@ -7,6 +7,7 @@ import { SmoothScroll } from '@/components/ui/SmoothScroll';
 
 import { AuthProvider } from '@/context/AuthContext';
 import { ThemeProvider } from 'next-themes';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 const poppins = Poppins({ weight: ['400', '500', '600', '700'], subsets: ['latin'], variable: '--font-poppins' });
@@ -25,11 +26,13 @@ export default function RootLayout({
     <html lang="en" className="dark" suppressHydrationWarning>
       <body className={`${inter.variable} ${poppins.variable} font-sans antialiased min-h-screen flex flex-col bg-[#05050f] text-white overflow-x-hidden`}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
-          <AuthProvider>
-            <SmoothScroll />
-            <ScrollProgress />
-            {children}
-          </AuthProvider>
+          <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}>
+            <AuthProvider>
+              <SmoothScroll />
+              <ScrollProgress />
+              {children}
+            </AuthProvider>
+          </GoogleOAuthProvider>
         </ThemeProvider>
       </body>
     </html>

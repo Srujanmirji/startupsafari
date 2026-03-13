@@ -19,7 +19,8 @@ export function Navbar() {
   };
 
   return (
-    <nav className="fixed top-0 left-0 w-full z-50 bg-brand-deep/60 backdrop-blur-xl border-b border-white/5">
+    <>
+      <nav className="fixed top-0 left-0 w-full z-50 bg-brand-deep/60 backdrop-blur-xl border-b border-white/5">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 group">
           <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-electric-blue to-violet-glow flex items-center justify-center text-white shadow-[0_0_15px_rgba(59,130,246,0.5)] group-hover:scale-105 transition-transform">
@@ -29,12 +30,12 @@ export function Navbar() {
         </Link>
         
         <div className="hidden md:flex items-center gap-8">
-          <Link href="#how-it-works" className="text-sm font-medium text-zinc-300 hover:text-white transition-colors">How it Works</Link>
-          <Link href="#experts" className="text-sm font-medium text-zinc-300 hover:text-white transition-colors">AI Experts</Link>
-          <Link href="#demo" className="text-sm font-medium text-zinc-300 hover:text-white transition-colors">Live Demo</Link>
         </div>
 
         <div className="flex items-center gap-3 sm:gap-6">
+          <Link href="/explore" className="text-sm font-bold text-zinc-400 hover:text-white transition-colors">
+            Features Hub
+          </Link>
           {!user ? (
             <>
               <button 
@@ -79,14 +80,14 @@ export function Navbar() {
       {/* Mobile Menu Overlay */}
       {isOpen && (
         <div className="md:hidden absolute top-20 left-0 w-full bg-brand-deep border-b border-white/10 p-6 flex flex-col gap-6 animate-in slide-in-from-top duration-300">
-          <Link href="#how-it-works" onClick={() => setIsOpen(false)} className="text-lg font-medium text-zinc-300">How it Works</Link>
-          <Link href="#experts" onClick={() => setIsOpen(false)} className="text-lg font-medium text-zinc-300">AI Experts</Link>
-          <Link href="#demo" onClick={() => setIsOpen(false)} className="text-lg font-medium text-zinc-300">Live Demo</Link>
+          <Link href="/explore" onClick={() => setIsOpen(false)} className="text-lg font-medium text-zinc-300">Features Hub</Link>
           <Link href="/login" onClick={() => setIsOpen(false)} className="text-lg font-medium text-zinc-300">Sign In</Link>
         </div>
       )}
 
+      </nav>
+
       <SignupModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
-    </nav>
+    </>
   );
 }

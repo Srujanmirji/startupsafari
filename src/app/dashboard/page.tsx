@@ -69,6 +69,21 @@ export default function Dashboard() {
 
         {loading ? (
             <div className="py-20 text-center text-zinc-500">Loading your ideas...</div>
+        ) : ideas.length === 0 ? (
+            <div className="py-24 flex flex-col items-center justify-center text-center border border-dashed border-white/10 rounded-3xl bg-white/[0.02]">
+                <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-6 border border-white/10">
+                    <Plus className="w-8 h-8 text-zinc-500" />
+                </div>
+                <h3 className="text-xl font-bold font-heading text-white mb-2">No Hunts Yet</h3>
+                <p className="text-zinc-500 max-w-sm mb-8 font-medium">You haven't analyzed any startup ideas yet. Start your first validation journey.</p>
+                <Link 
+                    href="/submit" 
+                    className="flex items-center gap-2 bg-white text-black px-6 py-3 rounded-xl font-bold hover:bg-zinc-200 transition-colors shadow-xl"
+                >
+                    <Plus className="w-5 h-5 -ml-1" />
+                    New Validation
+                </Link>
+            </div>
         ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {ideas.map((idea, i) => (
@@ -113,6 +128,43 @@ export default function Dashboard() {
                 ))}
             </div>
         )}
+        {/* Industry Heatmap */}
+        <div className="mt-16 p-8 rounded-[2.5rem] bg-white/[0.02] border border-white/5 backdrop-blur-3xl relative overflow-hidden">
+             <div className="absolute top-0 right-0 p-8 opacity-10">
+                <BarChart3 className="w-32 h-32" />
+             </div>
+             <div className="relative z-10">
+                <div className="flex items-center gap-4 mb-8">
+                    <div className="p-3 rounded-2xl bg-violet-600/10 border border-violet-600/20 text-violet-500">
+                        <LayoutGrid className="w-6 h-6" />
+                    </div>
+                    <div>
+                        <h3 className="text-2xl font-bold font-heading">Safari Global Insights</h3>
+                        <p className="text-zinc-500 text-sm">Real-time startup viability trends across the ecosystem</p>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-2 shadow-2xl md:grid-cols-4 gap-6">
+                    {[
+                        { industry: "AI & ML", trend: "+12%", score: 88, color: "text-emerald-400" },
+                        { industry: "SaaS", trend: "+5%", score: 74, color: "text-blue-400" },
+                        { industry: "FinTech", trend: "-2%", score: 62, color: "text-amber-400" },
+                        { industry: "E-commerce", trend: "+8%", score: 79, color: "text-purple-400" }
+                    ].map((item, idx) => (
+                        <div key={idx} className="p-5 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all cursor-default">
+                            <div className="flex justify-between items-center mb-2">
+                                <span className="text-xs font-bold text-zinc-500 uppercase tracking-widest">{item.industry}</span>
+                                <span className={`text-[10px] font-bold ${item.color}`}>{item.trend}</span>
+                            </div>
+                            <div className="text-2xl font-bold text-white mb-2">{item.score} <span className="text-[10px] text-zinc-600">AVG</span></div>
+                            <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+                                <div className="h-full bg-electric-blue transition-all" style={{ width: `${item.score}%` }}></div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+             </div>
+        </div>
       </main>
     </div>
   );

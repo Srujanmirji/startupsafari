@@ -4,6 +4,7 @@ import { useRef, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
 import * as THREE from "three";
+import Link from "next/link";
 
 const EXPERTS = [
   { name: "Fox", icon: "🦊", role: "Idea Logic", color: "#facc15" },
@@ -34,14 +35,15 @@ function OrbitingExpert({ expert, index, total, radius, isMobile }: { expert: an
   return (
     <group ref={groupRef}>
       <Html center zIndexRange={[100, 0]}>
-        <div 
+        <Link 
+          href={`/submit?expert=${expert.name.toLowerCase()}`}
           className={`flex flex-col items-center justify-center p-2 rounded-xl bg-[#09090b]/80 border border-white/10 backdrop-blur-md shadow-[0_0_15px_rgba(59,130,246,0.3)] transition-transform hover:scale-110 cursor-pointer pointer-events-auto border-b-[3px] ${isMobile ? 'w-24 p-1.5' : 'w-32'}`} 
           style={{ borderBottomColor: expert.color }}
         >
           <div className={`${isMobile ? 'text-xl' : 'text-3xl'} mb-1 filter drop-shadow-lg`}>{expert.icon}</div>
           <div className={`text-white font-bold font-heading ${isMobile ? 'text-[10px]' : 'text-xs'}`}>{expert.name}</div>
           {!isMobile && <div className="text-zinc-400 text-[10px] text-center leading-tight mt-1">{expert.role}</div>}
-        </div>
+        </Link>
       </Html>
     </group>
   );

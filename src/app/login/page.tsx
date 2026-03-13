@@ -6,6 +6,7 @@ import { Sparkles, Mail, Chrome, ArrowRight, Loader2 } from "lucide-react";
 import Link from "next/link";
 import React, { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { useGoogleLogin } from '@react-oauth/google';
 
 import { AuroraBackground } from "@/components/ui/AuroraBackground";
 
@@ -14,7 +15,31 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
-  const { signInWithGoogle, signInWithOtp } = useAuth();
+  const [otpSent, setOtpSent] = useState(false);
+  const [otp, setOtp] = useState("");
+  const { signInWithOtp, verifyOtp, setLocalUser } = useAuth();
+  
+  const loginWithGoogle = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      console.log("Google Login Success! Token:", tokenResponse.access_token);
+      try {
+          // Fetch user details from Google
+          const res = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+            headers: {
+              Authorization: `Bearer ${tokenResponse.access_token}`
+            }
+          });
+          const userInfo = await res.json();
+          // Save the user in AuthContext (LocalStorage)
+          setLocalUser(userInfo);
+          // Redirect
+          window.location.href = "/dashboard";
+      } catch (err) {
+          console.error("Error connecting with Google", err);
+      }
+    },
+    onError: error => console.log('Login Failed', error)
+  });
 
   // 3D Tilt Logic
   const x = useMotionValue(0);
@@ -48,9 +73,26 @@ export default function Login() {
     try {
       const { error } = await signInWithOtp(email);
       if (error) throw error;
+      setOtpSent(true);
       setMessage({ type: 'success', text: "OTP sent! Check your inbox." });
     } catch (err: any) {
       setMessage({ type: 'error', text: err.message || "Failed to send OTP." });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage(null);
+    try {
+      const { error } = await verifyOtp(email, otp);
+      if (error) throw error;
+      // Force reload or redirect to dashboard
+      window.location.href = "/dashboard";
+    } catch (err: any) {
+      setMessage({ type: 'error', text: err.message || "Invalid OTP code." });
     } finally {
       setLoading(false);
     }
@@ -101,7 +143,8 @@ export default function Login() {
             {/* Social Logins */}
             <div className="space-y-4 mb-8" style={{ transform: "translateZ(40px)" }}>
               <button 
-                onClick={() => signInWithGoogle()}
+                type="button"
+                onClick={() => loginWithGoogle()}
                 className="w-full flex items-center justify-center gap-3 py-3.5 rounded-xl bg-white/[0.03] border border-white/10 hover:bg-white/[0.08] hover:border-white/20 transition-all font-semibold text-zinc-300 hover:text-white group"
               >
                   <Chrome className="w-5 h-5 group-hover:scale-110 transition-transform" />
@@ -116,50 +159,98 @@ export default function Login() {
             </div>
 
             {/* Form */}
-            <form onSubmit={handleOtpLogin} className="space-y-5" style={{ transform: "translateZ(45px)" }}>
-              <div className="group">
-                  <div className="relative overflow-hidden rounded-xl bg-white/[0.02] border border-white/10 focus-within:border-electric-blue/50 focus-within:bg-white/[0.04] transition-all duration-300">
-                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 group-focus-within:text-electric-blue transition-colors z-10" />
-                      <input 
-                          type="email" 
-                          required
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          placeholder="name@company.com" 
-                          className="w-full bg-transparent pl-12 pr-4 py-4 text-white placeholder:text-zinc-600 focus:outline-none text-sm font-medium relative z-10"
-                      />
-                      {/* Focus background glow */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-electric-blue/0 to-transparent opacity-0 group-focus-within:opacity-20 transition-opacity duration-500 pointer-events-none" />
-                  </div>
-              </div>
-
-              {message && (
-                <div className={`p-4 rounded-xl text-sm font-medium ${message.type === 'success' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
-                  {message.text}
+            {/* Form */}
+            {!otpSent ? (
+              <form onSubmit={handleOtpLogin} className="space-y-5" style={{ transform: "translateZ(45px)" }}>
+                <div className="group">
+                    <div className="relative overflow-hidden rounded-xl bg-white/[0.02] border border-white/10 focus-within:border-electric-blue/50 focus-within:bg-white/[0.04] transition-all duration-300">
+                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 group-focus-within:text-electric-blue transition-colors z-10" />
+                        <input 
+                            type="email" 
+                            required
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder="name@company.com" 
+                            className="w-full bg-transparent pl-12 pr-4 py-4 text-white placeholder:text-zinc-600 focus:outline-none text-sm font-medium relative z-10"
+                        />
+                        {/* Focus background glow */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-electric-blue/0 to-transparent opacity-0 group-focus-within:opacity-20 transition-opacity duration-500 pointer-events-none" />
+                    </div>
                 </div>
-              )}
 
-              <button 
-                  type="submit"
-                  disabled={loading}
-                  onMouseEnter={() => setIsHovered(true)}
-                  onMouseLeave={() => setIsHovered(false)}
-                  className="mt-2 w-full flex items-center justify-center gap-2 bg-white text-black py-4 rounded-xl font-bold hover:bg-zinc-200 transition-all shadow-[0_0_20px_rgba(255,255,255,0.15)] group relative overflow-hidden disabled:opacity-70"
-              >
-                  <span className="relative z-10">{loading ? "Sending..." : "Send OTP"}</span>
-                  {!loading && (
-                    <motion.div
-                      animate={{ x: isHovered ? 5 : 0 }}
-                      className="relative z-10"
-                    >
-                      <ArrowRight className="w-4 h-4" />
-                    </motion.div>
-                  )}
-                  {loading && <Loader2 className="w-4 h-4 animate-spin relative z-10" />}
-                  {/* Button Hover effect */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent -translate-x-full group-hover:animate-shimmer" />
-              </button>
-            </form>
+                {message && (
+                  <div className={`p-4 rounded-xl text-sm font-medium ${message.type === 'success' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
+                    {message.text}
+                  </div>
+                )}
+
+                <button 
+                    type="submit"
+                    disabled={loading}
+                    onMouseEnter={() => setIsHovered(true)}
+                    onMouseLeave={() => setIsHovered(false)}
+                    className="mt-2 w-full flex items-center justify-center gap-2 bg-white text-black py-4 rounded-xl font-bold hover:bg-zinc-200 transition-all shadow-[0_0_20px_rgba(255,255,255,0.15)] group relative overflow-hidden disabled:opacity-70"
+                >
+                    <span className="relative z-10">{loading ? "Sending..." : "Send OTP"}</span>
+                    {!loading && (
+                      <motion.div
+                        animate={{ x: isHovered ? 5 : 0 }}
+                        className="relative z-10"
+                      >
+                        <ArrowRight className="w-4 h-4" />
+                      </motion.div>
+                    )}
+                    {loading && <Loader2 className="w-4 h-4 animate-spin relative z-10" />}
+                    {/* Button Hover effect */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent -translate-x-full group-hover:animate-shimmer" />
+                </button>
+              </form>
+            ) : (
+              <form onSubmit={handleVerifyOtp} className="space-y-5" style={{ transform: "translateZ(45px)" }}>
+                <div className="group">
+                    <div className="relative overflow-hidden rounded-xl bg-white/[0.02] border border-white/10 focus-within:border-electric-blue/50 focus-within:bg-white/[0.04] transition-all duration-300">
+                        <Sparkles className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 group-focus-within:text-electric-blue transition-colors z-10" />
+                        <input 
+                            type="text" 
+                            required
+                            value={otp}
+                            onChange={(e) => setOtp(e.target.value)}
+                            placeholder="123456" 
+                            className="w-full bg-transparent pl-12 pr-4 py-4 text-white placeholder:text-zinc-600 focus:outline-none text-sm font-medium relative z-10 tracking-widest"
+                        />
+                        {/* Focus background glow */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-electric-blue/0 to-transparent opacity-0 group-focus-within:opacity-20 transition-opacity duration-500 pointer-events-none" />
+                    </div>
+                </div>
+
+                {message && (
+                  <div className={`p-4 rounded-xl text-sm font-medium ${message.type === 'success' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
+                    {message.text}
+                  </div>
+                )}
+
+                <button 
+                    type="submit"
+                    disabled={loading}
+                    onMouseEnter={() => setIsHovered(true)}
+                    onMouseLeave={() => setIsHovered(false)}
+                    className="mt-2 w-full flex items-center justify-center gap-2 bg-white text-black py-4 rounded-xl font-bold hover:bg-zinc-200 transition-all shadow-[0_0_20px_rgba(255,255,255,0.15)] group relative overflow-hidden disabled:opacity-70"
+                >
+                    <span className="relative z-10">{loading ? "Verifying..." : "Verify OTP"}</span>
+                    {!loading && (
+                      <motion.div
+                        animate={{ x: isHovered ? 5 : 0 }}
+                        className="relative z-10"
+                      >
+                        <ArrowRight className="w-4 h-4" />
+                      </motion.div>
+                    )}
+                    {loading && <Loader2 className="w-4 h-4 animate-spin relative z-10" />}
+                    {/* Button Hover effect */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent -translate-x-full group-hover:animate-shimmer" />
+                </button>
+              </form>
+            )}
 
             <p className="mt-8 text-center text-sm font-medium text-zinc-500" style={{ transform: "translateZ(20px)" }}>
               Don't have an account?{" "}

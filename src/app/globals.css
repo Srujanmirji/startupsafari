@@ -75,3 +75,13 @@ html.lenis, html.lenis body {
 .lenis.lenis-smooth iframe {
   pointer-events: none;
 }
+
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  nav {
+    display: none !important;
+  }
+}
