@@ -6,14 +6,18 @@ import { IdeaOrbit } from "./IdeaOrbit";
 import React, { useState, useEffect } from "react";
 
 export function HeroScene() {
+  const [mounted, setMounted] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const checkMobile = () => setIsMobile(window.innerWidth < 1024);
     checkMobile();
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
+
+  if (!mounted) return null;
 
   return (
     <div className="absolute inset-0 w-full h-full pointer-events-none z-0">
