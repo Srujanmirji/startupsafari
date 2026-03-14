@@ -109,6 +109,7 @@ const STATS = [
 ];
 
 export default function Home() {
+  const [mounted, setMounted] = useState(false);
   const { user } = useAuth();
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -125,6 +126,10 @@ export default function Home() {
   const parallaxY1 = useTransform(p1, [0, 1], [80, -80]);
   const parallaxY2 = useTransform(p2, [0, 1], [100, -100]);
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const handleStartAnalysis = () => {
     if (user) {
       router.push("/submit");
@@ -133,14 +138,12 @@ export default function Home() {
     }
   };
 
+  if (!mounted) {
+    return <div className="min-h-screen bg-[#05050f]" />;
+  }
+
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Scroll Progress Bar */}
-      <motion.div
-        className="fixed top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-violet-500 via-blue-500 to-cyan-500 origin-left z-[100]"
-        style={{ scaleX }}
-      />
-
       <Navbar />
 
       <main>
