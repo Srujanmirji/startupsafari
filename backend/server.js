@@ -8,6 +8,7 @@ const analysisRoutes = require('./routes/analysisRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const chatRoutes = require('./routes/chatRoutes');
+const cofounderRoutes = require('./routes/cofounderRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -31,6 +32,7 @@ app.use('/api', analysisRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/co-founder', cofounderRoutes);
 
 // Global Error Handler
 app.use((err, req, res, next) => {

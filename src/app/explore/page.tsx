@@ -70,7 +70,7 @@ export default function ExploreFeatures() {
       icon: Users,
       color: "text-cyan-400",
       bg: "bg-cyan-400/10",
-      link: "/dashboard"
+      link: "/co-founder"
     },
     {
       title: "Evolution Tracker",
