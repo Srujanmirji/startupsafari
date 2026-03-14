@@ -107,14 +107,16 @@ export function SignupModal({ isOpen, onClose }: SignupModalProps) {
           </div>
 
           <div className="space-y-4">
-            <button
-              type="button"
-              onClick={() => loginWithGoogle()}
-              className="w-full flex items-center justify-center gap-3 py-3.5 rounded-xl bg-white/[0.03] border border-white/10 hover:bg-white/[0.08] transition-all font-semibold text-zinc-300 hover:text-white group"
-            >
-              <Chrome className="w-5 h-5 group-hover:scale-110 transition-transform" />
-              Continue with Google
-            </button>
+            {process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID && (
+              <button
+                type="button"
+                onClick={() => loginWithGoogle()}
+                className="w-full flex items-center justify-center gap-3 py-3.5 rounded-xl bg-white/[0.03] border border-white/10 hover:bg-white/[0.08] transition-all font-semibold text-zinc-300 hover:text-white group"
+              >
+                <Chrome className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                Continue with Google
+              </button>
+            )}
 
             <div className="relative py-2 text-center">
               <div className="absolute top-1/2 left-0 w-full h-[1px] bg-white/10 -translate-y-1/2"></div>
