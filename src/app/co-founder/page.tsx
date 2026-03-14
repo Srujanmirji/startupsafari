@@ -13,7 +13,7 @@ import {
   Rocket, Handshake, ExternalLink, Plus, Star
 } from "lucide-react";
 
-const API_URL = "http://localhost:5000/api";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "/api";
 
 const SKILL_OPTIONS = [
   "React", "Node.js", "Python", "AI/ML", "Design", "Marketing", "Sales",
