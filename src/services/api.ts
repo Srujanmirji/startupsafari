@@ -302,6 +302,11 @@ export const api = {
     return await axios.post(`${API_URL}/chat/shark-tank`, data, { headers });
   },
 
+  warRoomChat: async (data: { idea_id: string, message: string, experts: string[], history?: any[] }) => {
+    const headers = getAuthHeaders();
+    return await axios.post(`${API_URL}/chat/war-room`, data, { headers });
+  },
+
 
   getIdeaVersions: async (ideaId: string) => {
     const versions = JSON.parse(localStorage.getItem(`safari_versions_${ideaId}`) || '[]');

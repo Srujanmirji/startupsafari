@@ -94,7 +94,7 @@ export default function ExploreFeatures() {
       icon: ShieldAlert,
       color: "text-rose-500",
       bg: "bg-rose-500/10",
-      link: "/dashboard"
+      link: "/shark-tank"
     }
   ];
 

@@ -29,7 +29,12 @@ export function Navbar() {
           <span className="text-lg sm:text-xl font-bold font-heading text-white tracking-tight">StartupSafari</span>
         </Link>
         
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden md:flex items-center gap-6">
+          <Link href="/shark-tank" className="text-sm font-bold text-zinc-400 hover:text-white transition-colors">Shark Tank</Link>
+          <div className="w-1 h-1 rounded-full bg-white/10" />
+          <Link href="/war-room" className="text-sm font-bold text-zinc-400 hover:text-white transition-colors">War Room</Link>
+          <div className="w-1 h-1 rounded-full bg-white/10" />
+          <Link href="/co-founder" className="text-sm font-bold text-zinc-400 hover:text-white transition-colors">Co-Founders</Link>
         </div>
 
         <div className="flex items-center gap-3 sm:gap-6">

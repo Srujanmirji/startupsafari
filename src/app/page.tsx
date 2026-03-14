@@ -84,14 +84,14 @@ const SAFARI_EXPERTS = [
 ];
 
 const FEATURES = [
-  { title: "AI Deep Dive Interview", desc: "6-step guided interview refines your idea before the panel evaluates it.", icon: Search, color: "text-blue-400", bg: "from-blue-500/10 to-blue-900/5" },
-  { title: "10 Expert AI Personas", desc: "Each animal expert scores your idea from their unique perspective.", icon: Users, color: "text-violet-400", bg: "from-violet-500/10 to-violet-900/5" },
-  { title: "Live Expert Chat", desc: "Chat 1-on-1 with any expert persona for follow-up questions.", icon: MessageSquare, color: "text-purple-400", bg: "from-purple-500/10 to-purple-900/5" },
-  { title: "Pitch Deck Generator", desc: "Auto-generates a 10-slide investor-ready pitch deck structure.", icon: Presentation, color: "text-amber-400", bg: "from-amber-500/10 to-amber-900/5" },
-  { title: "Hacker's Toolkit", desc: "Generates README.md and an 8-week sprint MVP roadmap.", icon: FileCode, color: "text-rose-400", bg: "from-rose-500/10 to-rose-900/5" },
-  { title: "Co-Founder Matching", desc: "Find the perfect co-founder based on skills and startup gaps.", icon: Handshake, color: "text-cyan-400", bg: "from-cyan-500/10 to-cyan-900/5" },
-  { title: "Evolution Tracker", desc: "Re-evaluate and track your score improvements across versions.", icon: RefreshCw, color: "text-emerald-400", bg: "from-emerald-500/10 to-emerald-900/5" },
-  { title: "The Shark Tank", desc: "Defend your numbers in a live chat against the ruthless Shark.", icon: ShieldAlert, color: "text-rose-500", bg: "from-rose-500/10 to-rose-900/5" },
+  { title: "AI Deep Dive Interview", desc: "6-step guided interview refines your idea before the panel evaluates it.", icon: Search, color: "text-blue-400", bg: "from-blue-500/10 to-blue-900/5", link: "/submit" },
+  { title: "10 Expert AI Personas", desc: "Each animal expert scores your idea from their unique perspective.", icon: Users, color: "text-violet-400", bg: "from-violet-500/10 to-violet-900/5", link: "/dashboard" },
+  { title: "Live Expert Chat", desc: "Chat 1-on-1 with any expert persona for follow-up questions.", icon: MessageSquare, color: "text-purple-400", bg: "from-purple-500/10 to-purple-900/5", link: "/dashboard" },
+  { title: "Pitch Deck Generator", desc: "Auto-generates a 10-slide investor-ready pitch deck structure.", icon: Presentation, color: "text-amber-400", bg: "from-amber-500/10 to-amber-900/5", link: "/dashboard" },
+  { title: "Hacker's Toolkit", desc: "Generates README.md and an 8-week sprint MVP roadmap.", icon: FileCode, color: "text-rose-400", bg: "from-rose-500/10 to-rose-900/5", link: "/dashboard" },
+  { title: "Co-Founder Matching", desc: "Find the perfect co-founder based on skills and startup gaps.", icon: Handshake, color: "text-cyan-400", bg: "from-cyan-500/10 to-cyan-900/5", link: "/co-founder" },
+  { title: "Evolution Tracker", desc: "Re-evaluate and track your score improvements across versions.", icon: RefreshCw, color: "text-emerald-400", bg: "from-emerald-500/10 to-emerald-900/5", link: "/dashboard" },
+  { title: "The Shark Tank", desc: "Defend your numbers in a live chat against the ruthless Shark.", icon: ShieldAlert, color: "text-rose-500", bg: "from-rose-500/10 to-rose-900/5", link: "/shark-tank" },
 ];
 
 const STEPS = [
@@ -319,18 +319,19 @@ export default function Home() {
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"
             >
               {FEATURES.map((feature, i) => (
-                <motion.div
-                  key={i}
-                  variants={cardPopIn}
-                  whileHover={{ y: -8, scale: 1.03, transition: { type: "spring" as const, stiffness: 300, damping: 20 } }}
-                  className={`p-6 rounded-[1.5rem] bg-gradient-to-br ${feature.bg} border border-white/5 hover:border-white/15 transition-colors duration-500 group`}
-                >
-                  <div className={`w-12 h-12 rounded-xl bg-white/[0.06] flex items-center justify-center mb-5 ${feature.color} group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300`}>
-                    <feature.icon className="w-6 h-6" />
-                  </div>
-                  <h3 className="text-lg font-bold text-white mb-2 font-heading">{feature.title}</h3>
-                  <p className="text-sm text-zinc-500 leading-relaxed">{feature.desc}</p>
-                </motion.div>
+                <Link key={i} href={feature.link}>
+                  <motion.div
+                    variants={cardPopIn}
+                    whileHover={{ y: -8, scale: 1.03, transition: { type: "spring" as const, stiffness: 300, damping: 20 } }}
+                    className={`h-full p-6 rounded-[1.5rem] bg-gradient-to-br ${feature.bg} border border-white/5 hover:border-white/15 transition-colors duration-500 group cursor-pointer`}
+                  >
+                    <div className={`w-12 h-12 rounded-xl bg-white/[0.06] flex items-center justify-center mb-5 ${feature.color} group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300`}>
+                      <feature.icon className="w-6 h-6" />
+                    </div>
+                    <h3 className="text-lg font-bold text-white mb-2 font-heading">{feature.title}</h3>
+                    <p className="text-sm text-zinc-500 leading-relaxed">{feature.desc}</p>
+                  </motion.div>
+                </Link>
               ))}
             </motion.div>
 

@@ -220,9 +220,61 @@ const getChatHistory = async (req, res) => {
   }
 };
 
+const warRoomSession = async (req, res) => {
+  try {
+    const { idea_id, message, experts, history } = req.body;
+    const userId = req.user?.id;
+
+    if (!experts || !Array.isArray(experts) || experts.length === 0) {
+      return res.status(400).json({ error: "Missing experts for War Room" });
+    }
+
+    const expertNames = experts.join(", ");
+    
+    const systemPrompt = `
+      You are the moderator and the collective voice of a StartupSafari 'War Room' panel containing: ${expertNames}.
+      
+      Your role is to simulate a intense, high-stakes board meeting where these experts discuss the user's idea.
+      - Each expert retains their unique personality (Shark is ruthless, Owl is data-driven, Wolf is defensive, etc.).
+      - Experts can agree, disagree, or build on each other's points.
+      - Use expert names in the response like "[Shark]: ..." or "[Owl]: ...".
+      - Keep the total response length to 3-4 segments max.
+      - The goal is to CHALLENGE the founder (the user) and identify the biggest risk in their idea.
+      - Always include at least 2 different experts in the response.
+    `;
+
+    // 2. Prepare AI model
+    const genAI = GET_GEN_AI();
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+
+    let fullPrompt = `System Strategy: ${systemPrompt}\n\n`;
+    if (history && history.length > 0) {
+      fullPrompt += "War Room History:\n";
+      history.forEach(m => {
+        if (m.parts && m.parts[0]) {
+          fullPrompt += `${m.role.toUpperCase()}: ${m.parts[0].text}\n`;
+        }
+      });
+    }
+    fullPrompt += `USER (Founder): ${message}\nWAR_ROOM_PANEL:`;
+
+    const result = await model.generateContent(fullPrompt);
+    const response = await result.response;
+    const text = response.text();
+
+    res.json({ response: text });
+
+  } catch (error) {
+    console.error("War Room Error:", error);
+    res.status(500).json({ error: "The War Room session collapsed.", details: error.message });
+  }
+};
+
 module.exports = {
   chatWithExpert,
   sharkTankSession,
+  warRoomSession,
   getChatHistory
 };
+
 
